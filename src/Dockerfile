@@ -87,6 +87,14 @@ RUN wget --no-verbose https://apache.claz.org/flink/flink-1.11.1/flink-1.11.1-bi
 RUN tar -xzvf flink-1.11.1-bin-scala_2.11.tgz
 RUN mv flink-1.11.1 /opt/flink
 
+#Install flink from git
+RUN mkdir -p /opt/flink_git
+RUN git clone https://github.com/apache/flink.git /opt/flink_git
+
+RUN mkdir -p /opt/flink_git/build-target
+RUN cd /opt/flink_git && mvn clean package -DskipTests -Pfast 
+
+
 ENV FLINK_HOME=/opt/flink
 ENV PATH=$PATH:$FLINK_HOME/bin
 
@@ -113,9 +121,6 @@ ENV LD_LIBRARY_PATH=$HADOOP_HOME/lib/native
 ENV PATH=$PATH:$SPARK_HOME/sbin
 RUN mkdir -p /opt/spark/history
 COPY src/spark-defaults.conf /opt/spark/conf/spark-defaults.conf
-
-
-RUN mkdir -p /opt/flink/history
 COPY src/flink-conf.yaml /opt/flink/conf/flink-conf.yaml
 
 
