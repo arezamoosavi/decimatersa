@@ -67,9 +67,9 @@ RUN tar -xzvf hadoop-3.2.1.tar.gz
 RUN mv hadoop-3.2.1 /opt/hadoop
 
 # install spark
-RUN wget --no-verbose https://downloads.apache.org/spark/spark-2.4.6/spark-2.4.6-bin-hadoop2.7.tgz
-RUN tar -xzvf spark-2.4.6-bin-hadoop2.7.tgz
-RUN mv spark-2.4.6-bin-hadoop2.7 /opt/spark
+RUN wget --no-verbose https://downloads.apache.org/spark/spark-2.4.7/spark-2.4.7-bin-hadoop2.7.tgz
+RUN tar -xzvf spark-2.4.7-bin-hadoop2.7.tgz
+RUN mv spark-2.4.7-bin-hadoop2.7 /opt/spark
 
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV PATH=$PATH:$JAVA_HOME/bin
@@ -82,10 +82,14 @@ RUN wget --no-verbose https://repo.maven.apache.org/maven2/org/apache/maven/apac
 RUN tar -xzvf apache-maven-3.2.5-bin.tar.gz
 RUN mv apache-maven-3.2.5 /opt/maven
 
-#download flink
-RUN git clone https://github.com/apache/flink
-RUN cd flink
-RUN mvn clean install -DskipTests
+# install flink
+RUN wget --no-verbose https://apache.claz.org/flink/flink-1.11.1/flink-1.11.1-bin-scala_2.11.tgz
+RUN tar -xzvf flink-1.11.1-bin-scala_2.11.tgz
+RUN mv flink-1.11.1 /opt/flink
+
+ENV FLINK_HOME=/opt/flink
+ENV PATH=$PATH:$FLINK_HOME/bin
+
 
 # define environment variables for maven
 ENV M2_HOME=/opt/maven
@@ -95,8 +99,8 @@ ENV MAVEN_HOME=/opt/maven
 ENV PATH=$PATH:$MAVEN_HOME/bin
 RUN mvn --version
 
-RUN rm -rf scala-2.11.8.tgz spark-2.4.6-bin-hadoop2.7.tgz sbt-0.13.13.tgz \
-    apache-maven-3.6.0-bin.tar.gz hadoop-3.2.1.tar.gz
+RUN rm -rf scala-2.11.8.tgz spark-2.4.7-bin-hadoop2.7.tgz sbt-0.13.13.tgz \
+    apache-maven-3.6.0-bin.tar.gz hadoop-3.2.1.tar.gz flink-1.11.1-bin-scala_2.11.tgz
 
 ENV HADOOP_HOME=/opt/hadoop
 ENV HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
@@ -108,14 +112,23 @@ ENV LD_LIBRARY_PATH=$HADOOP_HOME/lib/native
 
 ENV PATH=$PATH:$SPARK_HOME/sbin
 RUN mkdir -p /opt/spark/history
-COPY container/spark-defaults.conf /opt/spark/conf/spark-defaults.conf
+COPY src/spark-defaults.conf /opt/spark/conf/spark-defaults.conf
+
+
+RUN mkdir -p /opt/flink/history
+COPY src/flink-conf.yaml /opt/flink/conf/flink-conf.yaml
+
 
 #Workiingg
-RUN mkdir -p /opt/project
-COPY ./src ./opt/project
 
-COPY container/run.sh /run.sh
+COPY src/requirements.txt requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+
+RUN mkdir -p /opt/project
+COPY ./src/main ./opt/project
+
+COPY src/run.sh /run.sh
 RUN chmod a+rwx /run.sh
 
 WORKDIR /opt/project
-# ENTRYPOINT bash /opt/spark/sbin/start-master.sh ; bash /opt/spark/sbin/start-slave.sh spark://localhost:7077

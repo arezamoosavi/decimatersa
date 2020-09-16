@@ -24,16 +24,14 @@ start-slave.sh spark://spark:7077
 sleep 1
 echo "worker started at port 8081 ...."
 
-# spark-submit --master spark://spark:7077 --verbose /opt/project/pi.py
-# spark-submit --class org.apache.spark.examples.SparkPi --master spark://spark:7077 --verbose /opt/spark/examples/jars/spark-examples*.jar 10
-# sbt clean assembly
-# spark-submit --master spark://spark:7077 --verbose RatingsCounter-assembly-1.0.jar 
-# spark-submit --master spark://spark:7077 --verbose MovieSimilarities-assembly-1.0.jar 60
-# spark-submit --master spark://spark:7077 --verbose SparkSQL-assembly-1.0.jar
-# spark-submit --master spark://spark:7077 --verbose MovieRecommendationsALS-assembly-1.0.jar 50
+
+start-cluster.sh
+taskmanager.sh start
+jobmanager.sh start
+
+sleep 1
+echo "flink started at port 3030 ...."
+
+# ./flink/build-target/bin/pyflink3.sh ~./flink-examples/word_count.py
 
 sleep 100000
-
-# ./build-target/bin/start-cluster.sh
-# ./build-target/bin/start-webclient.sh
-# ./flink/build-target/bin/pyflink3.sh ~./flink-examples/word_count.py
