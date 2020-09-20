@@ -25,9 +25,9 @@ sleep 1
 echo "worker started at port 8081 ...."
 
 
-start-cluster.sh
-taskmanager.sh start
-jobmanager.sh start
+# start-cluster.sh
+# taskmanager.sh start
+# jobmanager.sh start
 
 sleep 1
 echo "flink started at port 3030 ...."

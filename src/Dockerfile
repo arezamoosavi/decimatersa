@@ -82,23 +82,6 @@ RUN wget --no-verbose https://repo.maven.apache.org/maven2/org/apache/maven/apac
 RUN tar -xzvf apache-maven-3.2.5-bin.tar.gz
 RUN mv apache-maven-3.2.5 /opt/maven
 
-# install flink
-RUN wget --no-verbose https://apache.claz.org/flink/flink-1.11.1/flink-1.11.1-bin-scala_2.11.tgz
-RUN tar -xzvf flink-1.11.1-bin-scala_2.11.tgz
-RUN mv flink-1.11.1 /opt/flink
-
-#Install flink from git
-RUN mkdir -p /opt/flink_git
-RUN git clone https://github.com/apache/flink.git /opt/flink_git
-
-RUN mkdir -p /opt/flink_git/build-target
-RUN cd /opt/flink_git && mvn clean package -DskipTests -Pfast 
-
-
-ENV FLINK_HOME=/opt/flink
-ENV PATH=$PATH:$FLINK_HOME/bin
-
-
 # define environment variables for maven
 ENV M2_HOME=/opt/maven
 ENV PATH=$PATH:$M2_HOME/bin
@@ -106,6 +89,23 @@ ENV PATH=$PATH:$M2_HOME/bin
 ENV MAVEN_HOME=/opt/maven
 ENV PATH=$PATH:$MAVEN_HOME/bin
 RUN mvn --version
+
+
+
+# install flink
+RUN wget --no-verbose https://apache.claz.org/flink/flink-1.11.1/flink-1.11.1-bin-scala_2.11.tgz
+RUN tar -xzvf flink-1.11.1-bin-scala_2.11.tgz
+RUN mv flink-1.11.1 /opt/flink_apache
+
+#Install flink from git
+RUN mkdir -p /opt/flink
+RUN git clone https://github.com/apache/flink.git /opt/flink
+
+RUN mkdir -p /opt/flink/build-target
+RUN cd /opt/flink && mvn clean install -DskipTests 
+
+ENV FLINK_HOME=/opt/flink
+ENV PATH=$PATH:$FLINK_HOME/bin
 
 RUN rm -rf scala-2.11.8.tgz spark-2.4.7-bin-hadoop2.7.tgz sbt-0.13.13.tgz \
     apache-maven-3.6.0-bin.tar.gz hadoop-3.2.1.tar.gz flink-1.11.1-bin-scala_2.11.tgz
@@ -123,9 +123,7 @@ RUN mkdir -p /opt/spark/history
 COPY src/spark-defaults.conf /opt/spark/conf/spark-defaults.conf
 COPY src/flink-conf.yaml /opt/flink/conf/flink-conf.yaml
 
-
 #Workiingg
-
 COPY src/requirements.txt requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
 
